@@ -6,8 +6,9 @@ import { readFile } from 'node:fs/promises';
 import { seed } from './seed.mjs';
 
 const env = process.env;
-const port = Number(env.PORT || 4173);
-const base = new URL(env.BASE_URL || 'http://127.0.0.1:' + port);
+const host = env.HOST || (env.RENDER === 'true' ? '0.0.0.0' : '127.0.0.1');
+const port = Number(env.PORT || (env.RENDER === 'true' ? 10000 : 4173));
+const base = new URL(env.BASE_URL || env.RENDER_EXTERNAL_URL || 'http://127.0.0.1:' + port);
 const demo = env.DEMO_MODE !== 'false';
 const password = env.ADMIN_PASSWORD || (demo && 'tennis-demo');
 if (!password || (!demo && (!env.STRIPE_SECRET_KEY?.startsWith('sk_test_') || !env.STRIPE_WEBHOOK_SECRET))) {
@@ -487,6 +488,6 @@ const server=createServer(async(req,res)=>{
     else res.end();
   }
 });
-server.listen(port,'127.0.0.1',()=>console.log('NWI Summer Tennis running at '+base.origin+' ('+(demo?'demo':'Stripe test')+')'));
+server.listen(port,host,()=>console.log('NWI Summer Tennis listening on '+host+':'+port+'; public URL '+base.origin+' ('+(demo?'demo':'Stripe test')+')'));
 
 
